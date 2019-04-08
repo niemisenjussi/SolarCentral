@@ -1,0 +1,145 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <!--<link rel="stylesheet" href="stylesheets/styles.css" type="text/css" >
+    <link rel="stylesheet" href="stylesheets/pygment_trac.css" type="text/css" >-->
+    <link href="stylesheets/nv.d3.css" rel="stylesheet" type="text/css" >
+    <script src="build/d3.min.js" charset="utf-8"></script>
+    <script src="build/nv.d3.js"></script>
+    <script src="build/jquery.min.js" ></script>
+    <style>
+        text {
+            font: 12px sans-serif;
+        }
+
+        svg {
+            display: block;
+            height:100%;
+            width:100%;
+        }
+        html, body, #chart1, svg {
+            margin: 0px;
+            padding: 0px;
+            height: 100%;
+            width: 100%;
+        }
+        button {
+            margin: 2px;
+            margin-left: 80px;
+        }
+    </style>
+</head>
+<body onLoad="load_data();">
+<div id="chart1" class='with-3d-shadow with-transitions' style="height:100%;">
+    <svg> </svg>
+</div>
+
+<script>
+    var timeformats = {
+        "day":"%H:00 %d.%m.%Y",
+        "hour":"%H:%M %d.%m",
+        "15min":"%H:%M %d.%m",
+        "min":"%H:%M",
+        "sec":"%H:%M:%S"
+    }
+    
+    var dataset = [];
+    function load_data(){
+        $.ajax({
+            url: "getdata/15min/8",
+            dataType: "json",
+            success: function(response) {
+                dataset = response;
+                init_graph("15min");
+            }
+        });
+    }
+   
+
+    function init_graph(timelevel){
+        dataset.map(function(series) {
+            series.values = series.values.map(function(d) { return {x: d[0], y: d[1] } });
+            return series;
+        });
+
+        var chart;
+        nv.addGraph(function() {
+            chart = nv.models.linePlusBarChart()
+                .margin({top: 50, right: 80, bottom: 30, left: 80})
+                .legendRightAxisHint('')
+                .legendLeftAxisHint('')
+                .color(d3.scale.category10().range());
+            
+            chart.xAxis.tickFormat(function(d) {
+                return d3.time.format(timeformats[timelevel])(new Date(d))
+            }).showMaxMin(false);
+
+            chart.y1Axis.tickFormat(function(d) { return d3.format('.2f')(d)+"kWh" });
+            chart.y2Axis.tickFormat(function(d) { return d3.format('.2f')(d)+"W" });
+            chart.bars.forceY([0]).padData(false);
+
+            chart.x2Axis.tickFormat(function(d) {
+                return d3.time.format('%x')(new Date(d))
+            }).showMaxMin(false);
+
+            d3.select('#chart1 svg')
+                .datum(dataset)
+                .transition().duration(500).call(chart);
+
+            nv.utils.windowResize(chart.update);
+
+            chart.dispatch.on('stateChange', function(e) { nv.log('New State:', JSON.stringify(e)); });
+
+            return chart;
+        });
+    }
+    function init_graph2(){
+        dataset.map(function(series) {
+            series.values = series.values.map(function(d) { return {x: d[0], y: d[1] } });
+            return series;
+        });
+        nv.addGraph({
+            generate: function() {
+                var width = nv.utils.windowSize().width,
+                height = nv.utils.windowSize().height;
+                var chart = nv.models.multiBarChart()
+                .width(width)
+                .height(height)
+                .stacked(true);
+
+                chart.dispatch.on('renderEnd', function(){
+                    console.log('Render Complete');
+                });
+                
+                //CUSTOM
+                chart.xAxis.tickFormat(function(d) {
+                    return d3.time.format('%H:00 %d.%m')(new Date(d))
+                }).showMaxMin(false);
+
+                //chart.y1Axis.tickFormat(function(d) { return d3.format('.2f')(d)+"W" });
+                //chart.y2Axis.tickFormat(function(d) { return d3.format('.2f')(d)+"kWh" });
+                
+                
+                var svg = d3.select('#chart1 svg').datum(dataset);
+                console.log('calling chart');
+                svg.transition().duration(0).call(chart);
+                return chart;
+            },
+            callback: function(graph) {
+                nv.utils.windowResize(function() {
+                    var width = nv.utils.windowSize().width;
+                    var height = nv.utils.windowSize().height;
+                    graph.width(width).height(height);
+                    d3.select('#chart1 svg')
+                    .attr('width', width)
+                    .attr('height', height)
+                    .transition().duration(0)
+                    .call(graph);
+                });
+            }
+        });
+    }
+</script>
+</body>
+</html>

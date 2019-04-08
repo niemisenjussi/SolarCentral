@@ -1,0 +1,929 @@
+<!DOCTYPE HTML>
+<html>
+	<head>
+		
+		<title>SolarCentral</title>
+		<meta charset="utf-8" />
+		<meta name="viewport" content="width=device-width, initial-scale=1" />
+		<link rel="stylesheet" href="build/main.css" />
+		<meta charset="utf-8">
+		<link href="build/nv.d3.css" rel="stylesheet" type="text/css">
+		<script src="build/d3.min.js" charset="utf-8"></script>
+		<script src="build/nv.d3.js"></script>
+		<style>
+			text {
+				font: 12px sans-serif;
+			}
+
+			svg {
+				display: block;
+			}
+			html, body {
+				margin: 0px;
+				padding: 0px;
+				height: 100%;
+				width: 100%;
+                max-height: 700px;
+			}
+			
+			#power {
+				margin: 0px;
+				padding: 0px;
+				height: 100%;
+				width: 100%;
+			}
+			#energy {
+				margin: 0px;
+				padding: 0px;
+				height: 100%;
+				width: 100%;
+			}
+			#voltcur {
+				margin: 0px;
+				padding: 0px;
+				height: 100%;
+				width: 100%;
+			}
+			#mosfet {
+				margin: 0px;
+				padding: 0px;
+				height: 100%;
+				width: 100%;
+			}
+			svg {
+				margin: 0px;
+				padding: 0px;
+				height: 100%;
+				width: 100%;
+				
+			}
+			button {
+				margin: 2px;
+				margin-left: 80px;
+			}
+			svg text {
+				fill: white;
+			}
+            .nvd3 .nv-axis line {
+                fill: none;
+                stroke: #666;
+                shape-rendering: crispEdges;
+            }
+            .nvd3 g.nv-groups path.nv-line {
+                stroke-width: 3px;
+            }
+            .nv-context{
+                visibility:visible;
+            }
+            .select-wrapper{
+                display: inline-block;
+                width:30%;
+                float:right;
+            }
+            .indicators li{
+                overflow:visible !important;
+                text-indent:6em !important;
+                width:10em !important;
+                height:1.7em !important;
+            }
+  </style>		
+
+	</head>
+	<body onLoad="">
+		<!-- Header -->
+			<header id="header" class="alt" style="width:100%;display:inline-block;float:left;">
+				<div class="logo" style="display:inline-block;float:left;width:100%;">
+                    <a href="" style="float:left;">SolarCentral <span>aurinkoenergian monitorointi</span></a>
+                
+                            <div class="12u$" style="width:60%;float:right;margin-right:0px; height:35px">
+                                <div class="select-wrapper" style="width:30%;height:45px;margin-right:30px;">
+                                    <div style="width:100%;display:inline-block;float:left;height:100%;">
+                                        <div class="6u 12u$(medium)" style="display:inline-block; float:left;height:100%;width:100%;">
+                                            <h4 style="display:inline-block; float:left;margin-top:10px; color: rgba(255, 255, 255, 0.65);">Summaus:</h4>
+                                            <select name="period" id="period" style="display:inline-block;width:60%;">
+                                            </select>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="select-wrapper" style="width:30%; height:45px;margin-right:20px;">
+                                    <div style="width:100%; display:inline-block;float:left; height:100%;">
+                                        <div class="6u 12u$(medium)" style="display:inline-block;float:left;height:100%;width:100%;">
+                                            <h4 style="display:inline-block;float:left;margin-top:10px; color: rgba(255, 255, 255, 0.65);">Aikaväli:</h4>
+                                            <select name="window" id="window" style="display:inline-block;width:55%;">
+                                            </select>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                </div>
+			</header>
+		<!-- Banner -->
+			<section class="banner full" style="max-height:600px;">
+				<article style="height:100%;">
+					<div class="inner" style="width:90%; height:80%;">
+                        <header>
+                            <p>Kumulatiivinen tuotto</p>
+                        </header>
+					    <img src="images/slide04.jpg" alt="" />
+						<header style="width:100%; height:90%; margin-bottom:0px;">
+							<!--<div style="height:200px;width:40%;">-->
+								<!--<p>A free responsive web site template by <a href="https://templated.co">TEMPLATED</a></p>-->
+								<div id="energy" class='with-3d-shadow with-transitions'>
+								
+									<svg> </svg>
+								</div>	
+						</header>
+					</div>
+				</article>
+				<article style="height:100%;">
+					<div class="inner" style="width:90%; height:80%;">
+                        <header>
+                            <p>Panelien teho</p>
+                        </header>
+					    <img src="images/bg.jpg" alt="" />
+						<header style="width:100%; height:90%; margin-bottom:0px;">
+							<!--<div style="height:200px;width:40%;">-->
+								<!--<p>A free responsive web site template by <a href="https://templated.co">TEMPLATED</a></p>-->
+								<div id="power" class='with-3d-shadow with-transitions'>
+								
+									<svg> </svg>
+								</div>
+							
+						</header>
+					</div>
+				</article>
+				<article style="height:100%;">
+					<div class="inner" style="width:90%; height:80%;">
+                        <header>
+                            <p>Panelien virta ja jännite</p>
+                        </header>
+					    <img src="images/slide03.jpg" alt="" />
+						<header style="width:100%; height:90%; margin-bottom:0px;">
+                            <div id="voltcur" class='with-3d-shadow with-transitions'>
+                            
+                                <svg> </svg>
+                            </div>
+						</header>
+					</div>
+				</article>
+				<article style="height:100%;">
+					<div class="inner" style="width:90%; height:80%;">
+                        <header>
+                            <p>MosFET lämpötilat</p>
+                        </header>
+					    <img src="images/slide02.jpg" alt="" />
+						<header style="width:100%; height:90%; margin-bottom:0px;">
+                            <div id="mosfet" class='with-3d-shadow with-transitions'>
+                            
+                                <svg> </svg>
+                            </div>
+						</header>
+					</div>
+				</article>
+				<!--<article>
+					<img src="images/slide02.jpg" alt="" />
+					<div class="inner">
+						<header>
+							<p>Lorem ipsum dolor sit amet nullam feugiat</p>
+							<h2>Magna etiam</h2>
+						</header>
+					</div>
+				</article>
+				<article>
+					<img src="images/slide03.jpg"  alt="" />
+					<div class="inner">
+						<header>
+							<p>Sed cursus aliuam veroeros lorem ipsum nullam</p>
+							<h2>Tempus dolor</h2>
+						</header>
+					</div>
+				</article>
+				<article>
+					<img src="images/slide04.jpg"  alt="" />
+					<div class="inner">
+						<header>
+							<p>Adipiscing lorem ipsum feugiat sed phasellus consequat</p>
+							<h2>Etiam feugiat</h2>
+						</header>
+					</div>
+				</article>
+				<article>
+					<img src="images/slide05.jpg"  alt="" />
+					<div class="inner">
+						<header>
+							<p>Ipsum dolor sed magna veroeros lorem ipsum</p>
+							<h2>Lorem adipiscing</h2>
+						</header>
+					</div>
+				</article>-->
+			</section>
+
+		<!-- One -->
+			<section id="one" class="wrapper style2">
+				<div class="inner">
+					<div class="grid-style">
+
+						<!--<div>
+							<div class="box">
+								<div class="image fit">
+									<div id="powe2r" class='with-3d-shadow with-transitions'>
+										<svg> </svg>
+									</div>
+								</div>
+								<div class="content">
+									<header class="align-center">
+										<p>Päivätason arvot</p>
+										<h2>Energian määrä</h2>
+									</header>
+									
+									<footer class="align-center">
+									</footer>
+								</div>
+							</div>
+						</div>-->
+
+						<div>
+							<div class="box">
+								<div class="content" style="padding:0;min-height:720px;">
+									<header class="align-center">
+										<h2 style="margin-">Live kuvaa panelista</h2>
+									</header>
+								    <div class="image" style="width:100%;height:100%;margin-left:0px;margin-top:0px; margin-bottom:0px;margin-right:0px;">
+					                    <img id="rpicam" 
+                                             src="camera?time=1522957814376&pDelay=1"
+                                             alt=""
+                                             style="max-width:100%; max-height:100%; margin-left:0px; margin-top:0px; margin-bottom:0px; margin-right:0px;"/>
+								    </div>
+                                </div>
+							</div>
+						</div>
+						<div>
+							<div class="box">
+								<div class="content">
+									<header class="align-center">
+										<p>PWM ohjaimen statistiikka</p>
+										<h2>Live seuranta</h2>
+									</header>
+								    <table id="livedata" class="alt">
+                                        <thead>
+                                            <tr>
+                                                <th style="width:50%;">Parametri</th>
+                                                <th>Arvo</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                        </tbody>
+                                    </table>
+									<footer class="align-center">
+									</footer>
+								</div>
+							</div>
+						</div>
+						<div>
+							<div class="box">
+								<div class="content" style="max-height:600px; overflow:auto;">
+									<header class="align-center">
+										<p>Rahallinen tuotto päivätasolla</p>
+										<h2>Tuotto viimeinen kk</h2>
+									</header>
+								    <table id="lastweek_day" class="alt">
+                                        <thead>
+                                            <tr>
+                                                <th>Aika</th>
+                                                <th>Energia</th>
+                                                <th>Tuotto</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                        </tbody>
+                                    </table>
+                                    <p>*0.15€/kWh</p>
+									<footer class="align-center">
+									</footer>
+								</div>
+							</div>
+						</div>
+						<div>
+							<div class="box">
+								<div class="content" style="max-height:600px; overflow:auto;">
+									<header class="align-center">
+										<p>Kuukausittaiset arvot</p>
+										<h2>Tuotto kuukausitasolla</h2>
+									</header>
+								    <table id="monthlystats" class="alt">
+                                        <thead>
+                                            <tr>
+                                                <th>Kuukausi</th>
+                                                <th>Energia</th>
+                                                <th>Tuotto</th>
+                                                <th>PäiväKA</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                        </tbody>
+                                    </table>
+                                    <p>*0.15€/kWh</p>
+									<footer class="align-center">
+									</footer>
+								</div>
+							</div>
+						</div>
+					</div>
+				</div>
+			</section>
+<!--
+
+			<section id="two" class="wrapper style3">
+				<div class="inner">
+					<header class="align-center">
+						<p>Nam vel ante sit amet libero scelerisque facilisis eleifend vitae urna</p>
+						<h2>Morbi maximus justo</h2>
+					</header>
+				</div>
+			</section>
+
+			<section id="three" class="wrapper style2">
+				<div class="inner">
+					<header class="align-center">
+						<p class="special">Nam vel ante sit amet libero scelerisque facilisis eleifend vitae urna</p>
+						<h2>Morbi maximus justo</h2>
+					</header>
+					<div class="gallery">
+						<div>
+							<div class="image fit">
+								<a href="#"><img src="images/pic01.jpg" alt="" /></a>
+							</div>
+						</div>
+						<div>
+							<div class="image fit">
+								<a href="#"><img src="images/pic02.jpg" alt="" /></a>
+							</div>
+						</div>
+						<div>
+							<div class="image fit">
+								<a href="#"><img src="images/pic03.jpg" alt="" /></a>
+							</div>
+						</div>
+						<div>
+							<div class="image fit">
+								<a href="#"><img src="images/pic04.jpg" alt="" /></a>
+							</div>
+						</div>
+					</div>
+				</div>
+			</section>
+
+-->
+		<!-- Scripts -->
+			<script src="build/jquery.min.js"></script>
+			<script src="build/jquery.scrollex.min.js"></script>
+			<script src="build/skel.min.js"></script>
+			<script src="build/util.js"></script>
+			<script src="build/main.js"></script>
+		
+	<script>
+
+    var live_enabled = false;
+
+    function timeConverter(UNIX_timestamp){
+        var a = new Date(UNIX_timestamp);
+        var months = ['Tam','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+        var year = a.getFullYear();
+        var month = a.getMonth()+1;
+        var day = a.getDate();
+        var hour = a.getHours();
+        var min = a.getMinutes();
+        var sec = a.getSeconds();
+        var time = day + '.' + month + '.' + year;
+        return time;
+    }
+    
+    var table = {
+        'win':[
+           {'name':'5 minuuttia', 'divisor':5, 'aggregation':[0,1,2,3]},
+           {'name':'15 minuuttia', 'divisor':15, 'aggregation':[0,1,2,3]},
+           {'name':'4 tuntia', 'divisor':4*60, 'aggregation':[1,2,3]},
+           {'name':'8 tuntia', 'divisor':8*60, 'aggregation':[1,2,3]},
+           {'name':'12 tuntia', 'divisor':12*60, 'aggregation':[1,2,3]},
+           {'name':'Päivä', 'divisor':1*24*60, 'aggregation':[1,2,3]},
+           {'name':'4 päivää', 'divisor':4*24*60, 'aggregation':[2,3,4]},
+           {'name':'Viikko', 'divisor':7*24*60, 'aggregation':[3,4]},
+           {'name':'2 Viikkoa', 'divisor':14*24*60, 'aggregation':[3,4]},
+           {'name':'Kuukausi', 'divisor':30*24*60, 'aggregation':[3,4]},
+           {'name':'2 Kuukautta', 'divisor':60*24*60, 'aggregation':[3,4]},
+           {'name':'6 Kuukautta', 'divisor':180*24*60, 'aggregation':[4]},
+           {'name':'Vuosi', 'divisor':365*24*60, 'aggregation':[4]},
+           {'name':'2 Vuotta', 'divisor':2*365*24*60, 'aggregation':[4]}
+        ],
+        'agg':[
+            {'name':'Sekuntitaso', 'value':'sec', 'window':[0,1]},
+            {'name':'Minuuttitaso', 'value':'min', 'window':[0,1,2,3,4,5]},
+            {'name':'15 Minuuttia', 'value':'15min', 'window':[1,2,3,4,5]},
+            {'name':'Tuntitaso', 'value':'hour', 'window':[1,2,3,4,5,6,7,8,9,10]},
+            {'name':'Päivätaso', 'value':'day', 'window':[2,3,4,5,6,7,8,9,10,11,12,13]}
+        ]
+    }
+    var cascade = false;
+
+    var current_graph = 0;
+
+    function switch_graph(lastPos, x){
+        current_graph = x;
+        d3.selectAll("svg > *").remove();
+        $('.nvtooltip').remove();    
+
+        for (var i=0; i < graph_names.length; i++){
+            graphs[i] = "";
+        }
+        var agg = $("#period").val();
+        init_graph(agg, graph_names[x], x);
+    }
+
+    //aggregation period changed
+    function periodchanged(initiator){
+        var agg = $("#period option:selected").text(); //min, 15min, hour, day
+        var win = $("#window option:selected").text(); //numero 0.166, 0.3, 1, 4, 7, 14, 30, 60        
+        
+        var aggindex = 0;
+        for (var j = 0; j < table.agg.length; j++){
+            if (table.agg[j]['name'] == agg){
+                aggindex = j;
+                break;
+            }
+        }
+
+        $("#window").attr("onChange","");
+        $("#window").empty();
+        for (var i=0; i<table.agg[aggindex].window.length; i++){ //Loop through allowed values
+            var allowed = table.agg[aggindex].window[i];
+            var selected = "";
+            if (table.win[allowed].name == win){
+                selected = "selected";
+            }
+            $("#window").append("<option value=\""+table.win[allowed].divisor+"\" "+selected+">"+table.win[allowed].name+"</option>");
+        }
+
+        $("#window").attr("onChange","windowchanged(true);");
+        load_data(false);
+    }
+
+    //Time window changed
+    function windowchanged(initiator, initial){
+        var agg = $("#period option:selected").text(); //min, 15min, hour, day
+        var win = $("#window option:selected").text(); //numero 0.166, 0.3, 1, 4, 7, 14, 30, 60
+        
+        var winindex = 0;
+        for (var j = 0; j < table.win.length; j++){
+            if (table.win[j]['name'] == win){
+                winindex = j;
+                break;
+            }
+        }
+        $("#period").attr("onChange","");
+        $("#period").empty();
+        for (var i=0; i<table.win[winindex].aggregation.length; i++){ //Loop through allowed values
+            var allowed = table.win[winindex].aggregation[i];
+            var selected = "";
+            if (initial){
+                if (i == initial){
+                    selected = "selected";
+                }
+            }
+            else{
+                if (table.agg[allowed].name == agg){
+                    selected = "selected";    
+                }
+            }
+            $("#period").append("<option value=\""+table.agg[allowed].value+"\" "+selected+">"+table.agg[allowed].name+"</option>");
+        }
+
+        $("#period").attr("onChange","periodchanged(true);");
+        load_data(false);
+    }
+
+    function update_selections(initial){
+        $("#window").empty();
+        //populate Window options
+
+        //WArning, both of indexes depend how other one is selected. It is a combination, not absolute position
+        var winindex = 4; //12 hours window where data is laoded
+        var aggindex = 1;  //15 min period
+        for (var i=0; i<table.win[winindex].aggregation.length; i++){ //Loop through allowed values
+            var allowed = table.win[winindex].aggregation[i];
+            var selected = "";
+            if (i == aggindex){
+                selected = "selected";
+            }
+            $("#period").append("<option value=\""+table.agg[allowed].value+"\" "+selected+">"+table.agg[allowed].name+"</option>");
+        }
+
+        for (var i=0; i<table.agg[aggindex].window.length; i++){ //Loop through allowed values
+            var allowed = table.agg[aggindex].window[i];
+            var selected = "";
+            if (i == winindex){
+                selected = "selected";
+            }
+            $("#window").append("<option value=\""+table.win[allowed].divisor+"\" "+selected+">"+table.win[allowed].name+"</option>");
+        }
+        
+        //windowchanged(false,4);
+        $("#window").attr("onChange","windowchanged(true);");
+        $("#period").attr("onChange","periodchanged(true);");
+        //periodchanged(false);
+        load_data(false);
+    }
+
+
+    var timeformats = {
+        "day":"%H:00 %d.%m.%Y",
+        "hour":"%H:%M",
+        "15min":"%H:%M",
+        "min":"%H:%M",
+        "sec":"%H:%M:%S"
+    }
+   
+    function updatelive(){
+        $.ajax({
+            url: "getlive?rand="+Math.random(),
+            dataType: "json",
+            success: function(response) {
+                $("#livedata tbody").empty();
+                var pwm = 0;
+                var voltage = 0;
+                var current = 0;
+                var power = 0;
+                for (var i = 0; i < response.length; i++){
+                    $("#livedata tbody").append("<tr><td>"+response[i][0]+"</td><td>"+response[i][1]+"</td></tr>");
+                    if (response[i][0] == "Jännite"){
+                        voltage = parseFloat(response[i][1].replace('V',''));
+                    }
+                    else if (response[i][0] == "Virta"){
+                        current = parseFloat(response[i][1].replace('mA',''))/1000;
+                    }
+                    else if (response[i][0] == "Teho"){
+                        power = parseFloat(response[i][1].replace('W',''));
+                    }
+                    else if (response[i][0] == "PWM 1"){
+                        pwm += parseInt(response[i][1]);
+                    }
+                    else if (response[i][0] == "PWM 2"){
+                        pwm += parseInt(response[i][1]);
+                    }
+                    else if (response[i][0] == "PWM 3"){
+                        pwm += parseInt(response[i][1]);
+                    }
+                }
+                if ($("#period").val() == "sec"){
+                    live_graph_update(1, {'x':new Date().valueOf(), 'y1':power, 'y2':pwm});
+                    live_graph_update(2, {'x':new Date().valueOf(), 'y1':voltage, 'y2':current});
+                }
+            } 
+        });
+    }
+
+
+
+    var timer;
+    var datasets = [[],[],[],[],[]];
+    var graph_names = ["energy","power","voltcur","mosfet",""];
+    var indicators = ["Tuotto", "Teho", "Jännite/Virta", "MosFet"];
+    var units = [["kWh",""],["W",""],["V","A"],["",""]];
+    var graphs = ["","","","",""];
+    var initdone = false;
+    var pending = false;
+    function load_data(init){
+        if (pending == true){
+            return;
+        }
+        var aggregation = "15min"
+        var samples = 0;
+        if (init == false){
+            aggregation = $("#period").val();
+            samples = parseFloat($("#window").val());
+        }
+        
+        pending = true;
+        $.ajax({
+            url: "getdata/energy/"+aggregation+"/"+parseInt(samples)+"?rand="+Math.random(),
+            dataType: "json",
+            success: function(response) {
+                for (var i = 0; i < datasets.length; i++){
+                    datasets[i] = [];
+                }
+                //Tuotto
+                datasets[0][0] = response[0];
+
+                //Teho
+                datasets[1][0] = response[3];
+                datasets[1][1] = response[4];
+                datasets[1][0]['yAxis'] = 1;
+                datasets[1][1]['yAxis'] = 2;
+
+                //Virta/jännite
+                datasets[2][0] = response[1];
+                datasets[2][1] = response[2];
+                datasets[2][0]['yAxis'] = 1;
+                datasets[2][1]['yAxis'] = 2;
+                
+                //Mosfet
+                datasets[3][0] = response[5];
+                datasets[3][1] = response[6];
+                datasets[3][2] = response[7];
+                
+                for (var i= 0; i< datasets.length; i++){
+                    datasets[i].map(function(series) {
+                        series.values = series.values.map(function(d) { return {x: d[0], y: d[1] } });
+                        return series;
+                    });
+                }
+
+                //remove existing svg before drawing a new one
+                d3.selectAll("svg > *").remove();
+                init_graph(aggregation, graph_names[current_graph], current_graph);
+
+              initdone = true;
+              pending = false;
+            }
+        });
+        if (initdone == false){
+            $.ajax({
+                url: "getdata/plainenergy/day/30",
+                dataType: "json",
+                success: function(response) {
+                    var sum_kwh = 0;
+                    $("#lastweek_day tbody").empty();
+                    for (var i=0; i<response[0]['values'].length; i++){
+                        var date = timeConverter(response[0]['values'][i][0]);
+                        $("#lastweek_day tbody").append("<tr><td>"+date+"</td>"+
+                                                        "<td>"+parseFloat(response[0]['values'][i][1]).toFixed(2)+" kWh</td>"+
+                                                        "<td>"+parseFloat(response[0]['values'][i][1]*0.15).toFixed(2)+" €</td></tr>");
+
+                        sum_kwh += parseFloat(response[0]['values'][i][1]);
+                    }
+                    $("#lastweek_day tbody").append("<tr style=\"font-weight: bold;\"><td>Yhteensä</td>"+
+                                                        "<td>"+sum_kwh.toFixed(2)+" kWh</td>"+
+                                                        "<td>"+(sum_kwh*0.15).toFixed(2)+" €</td></tr>");
+                } 
+            });
+            //Update montly data 
+            $.ajax({
+                url: "monthly",
+                dataType: "json",
+                success: function(response) {
+                    var months = ["Tammi", "Helmi", "Maalis", "Huhti","Touko","Kesä","Heinä","Elo","Syys","Loka","Marras","Joulu"];
+                    var sum_kwh = 0;
+                    $("#monthlystats tbody").empty();
+                    for (var i=0; i<response[0]['values'].length; i++){
+                        var year = response[0]['values'][i][0];
+                        var month = months[response[0]['values'][i][1]-1];
+                        var power = parseFloat(response[0]['values'][i][2])/1000;
+                        console.log(year+" "+month+" "+power);
+                        $("#monthlystats tbody").append("<tr><td>" + year + "  " + month +"kuu</td>"+
+                                                        "<td>"+power.toFixed(2)+" kWh</td>"+
+                                                        "<td>"+(power*0.15).toFixed(2)+" €</td>"+
+                                                        "<td>"+(power/30.0).toFixed(2)+" kWh</td>"+
+                                                        "</tr>");
+
+                        sum_kwh += parseFloat(power);
+                    }
+                    $("#monthlystats tbody").append("<tr style=\"font-weight: bold;\"><td>Yhteensä</td>"+
+                                                        "<td>"+sum_kwh.toFixed(2)+" kWh</td>"+
+                                                        "<td>"+(sum_kwh*0.15).toFixed(2)+" €</td><td></td></tr>");
+                } 
+            });
+            
+            setInterval(updateCam, 3000);
+            setInterval(updatelive, 1000);
+            $( ".indicators li" ).each(function( index ) {
+                $(this).text(indicators[parseInt($(this).text())]);
+            });
+        }
+    } 
+
+    function updateCam(){
+        //console.log("http://10.0.0.2/html/cam_pic.php?time="+Date.now()+"&pDelay=1");
+        $("#rpicam").attr("src","camera?time="+Date.now());
+    }
+
+    $(document).ready(function () {
+       // $("#period").val($("#period option:nth-child(2)").val());
+        update_selections(true);
+       // $("#window").val($("#window option:nth-child(2)").val());
+    });
+
+    function live_graph_update(graphid, values){
+        datasets[graphid][0]['values'][datasets[graphid][0]['values'].length] = {'x':values['x'], 'y':values['y1']};
+        datasets[graphid][1]['values'][datasets[graphid][1]['values'].length] = {'x':values['x'], 'y':values['y2']};
+    
+        datasets[graphid][0]['values'].shift();
+        datasets[graphid][1]['values'].shift();
+        if (current_graph == graphid){
+            graphs[graphid].update();
+        }
+    }
+
+    function init_graph(timelevel, targetgraph, datasetindex){
+        
+        nv.addGraph(function() {
+            graphs[datasetindex] = nv.models.linePlusBarChart()
+                .margin({top: 50, right: 80, bottom: 30, left: 80})
+                .legendRightAxisHint('')
+                .legendLeftAxisHint('')
+                .color(['#FF8c00', '#FF3333', '#44aa22', '#486192']);
+               // .color(d3.scale.category10().range());
+            
+            //Main graph timestamp format
+            graphs[datasetindex].xAxis.tickFormat(function(d) {
+                return d3.time.format(timeformats[timelevel])(new Date(d))
+            }).showMaxMin(true);
+            
+            
+            if (datasetindex == 0){
+                graphs[datasetindex].y1Axis.tickFormat(function(d) { return d3.format('.2f')(d)+'kWh' });
+                graphs[datasetindex].forceY([0]);    
+            }
+            else if (datasetindex == 1){
+                graphs[datasetindex].y1Axis.tickFormat(function(d) { return d3.format('.2f')(d)+'W' });
+                graphs[datasetindex].y2Axis.tickFormat(function(d) { return d3.format('.0f')(d)+'' });
+                graphs[datasetindex].forceY([0]);    
+            }
+            else if (datasetindex == 2){
+                graphs[datasetindex].y2Axis.tickFormat(function(d) { return d3.format('.2f')(d)+'V'});
+                graphs[datasetindex].y1Axis.tickFormat(function(d) { return d3.format('.2f')(d)+'A' });
+                graphs[datasetindex].forceY([0]);    
+            }
+            else if (datasetindex == 3){
+                graphs[datasetindex].y2Axis.tickFormat(function(d) { return d3.format('.1f')(d)+' ℃ '});
+                graphs[datasetindex].bars.forceY([0,100]);    
+                graphs[datasetindex].forceY([0]);
+            }
+            
+            //This is small selection box timestamp format
+            graphs[datasetindex].x2Axis.tickFormat(function(d) {
+                return d3.time.format('%x')(new Date(d))
+            }).showMaxMin(false);
+
+
+            d3.select('#'+targetgraph+' svg')
+                .datum(datasets[datasetindex])
+                .transition().duration(500).call(graphs[datasetindex]);
+
+            nv.utils.windowResize(graphs[datasetindex].update);
+
+            graphs[datasetindex].dispatch.on('stateChange', function(e) { nv.log('New State:', JSON.stringify(e)); });
+
+        });
+    }
+    function init_graph2(timelevel, targetgraph){
+        dataset.map(function(series) {
+            series.values = series.values.map(function(d) { return {x: d[0], y: d[1] } });
+            return series;
+        });
+        nv.addGraph({
+            generate: function() {
+                var width = nv.utils.windowSize().width,
+                height = nv.utils.windowSize().height;
+                var chart = nv.models.multiBarChart()
+                    .width(width)
+                    .height(height)
+                    .stacked(false)
+                    .color(['#44AA22', '#FF3333', '#44aa22', '#486192']);
+
+                chart.dispatch.on('renderEnd', function(){
+                    console.log('Render Complete');
+                });
+                
+                //CUSTOM
+                chart.xAxis.tickFormat(function(d) {
+                    return d3.time.format(timeformats[timelevel])(new Date(d))
+                }).showMaxMin(false);
+
+                //chart.y1Axis.tickFormat(function(d) { return d3.format('.2f')(d)+"W" });
+                //chart.y2Axis.tickFormat(function(d) { return d3.format('.2f')(d)+"kWh" });
+                
+                
+                var svg = d3.select('#'+targetgraph+' svg').datum(dataset);
+                console.log('calling chart');
+                svg.transition().duration(0).call(chart);
+                return chart;
+            },
+            callback: function(graph) {
+                nv.utils.windowResize(function() {
+                    var width = nv.utils.windowSize().width;
+                    var height = nv.utils.windowSize().height;
+                    graph.width(width).height(height);
+                    d3.select('#'+targetgraph+' svg')
+                    .attr('width', width)
+                    .attr('height', height)
+                    .transition().duration(0)
+                    .call(graph);
+                });
+            }
+        });
+    }
+	/*	var testdata = [
+			{
+				"key" : "Quantity" ,
+				"bar": true,
+				"values" : [ [ 1136005200000 , 1271000.0] , [ 1138683600000 , 1271000.0] , [ 1141102800000 , 1271000.0] , [ 1143781200000 , 0] , [ 1146369600000 , 0] , [ 1149048000000 , 0] , [ 1151640000000 , 0] , [ 1154318400000 , 0] , [ 1156996800000 , 0] , [ 1159588800000 , 3899486.0] , [ 1162270800000 , 3899486.0] , [ 1164862800000 , 3899486.0] , [ 1167541200000 , 3564700.0] , [ 1170219600000 , 3564700.0] , [ 1172638800000 , 3564700.0] , [ 1175313600000 , 2648493.0] , [ 1177905600000 , 2648493.0] , [ 1180584000000 , 2648493.0] , [ 1183176000000 , 2522993.0] , [ 1185854400000 , 2522993.0] , [ 1188532800000 , 2522993.0] , [ 1191124800000 , 2906501.0] , [ 1193803200000 , 2906501.0] , [ 1196398800000 , 2906501.0] , [ 1199077200000 , 2206761.0] , [ 1201755600000 , 2206761.0] , [ 1204261200000 , 2206761.0] , [ 1206936000000 , 2287726.0] , [ 1209528000000 , 2287726.0] , [ 1212206400000 , 2287726.0] , [ 1214798400000 , 2732646.0] , [ 1217476800000 , 2732646.0] , [ 1220155200000 , 2732646.0] , [ 1222747200000 , 2599196.0] , [ 1225425600000 , 2599196.0] , [ 1228021200000 , 2599196.0] , [ 1230699600000 , 1924387.0] , [ 1233378000000 , 1924387.0] , [ 1235797200000 , 1924387.0] , [ 1238472000000 , 1756311.0] , [ 1241064000000 , 1756311.0] , [ 1243742400000 , 1756311.0] , [ 1246334400000 , 1743470.0] , [ 1249012800000 , 1743470.0] , [ 1251691200000 , 1743470.0] , [ 1254283200000 , 1519010.0] , [ 1256961600000 , 1519010.0] , [ 1259557200000 , 1519010.0] , [ 1262235600000 , 1591444.0] , [ 1264914000000 , 1591444.0] , [ 1267333200000 , 1591444.0] , [ 1270008000000 , 1543784.0] , [ 1272600000000 , 1543784.0] , [ 1275278400000 , 1543784.0] , [ 1277870400000 , 1309915.0] , [ 1280548800000 , 1309915.0] , [ 1283227200000 , 1309915.0] , [ 1285819200000 , 1331875.0] , [ 1288497600000 , 1331875.0] , [ 1291093200000 , 1331875.0] , [ 1293771600000 , 1331875.0] , [ 1296450000000 , 1154695.0] , [ 1298869200000 , 1154695.0] , [ 1301544000000 , 1194025.0] , [ 1304136000000 , 1194025.0] , [ 1306814400000 , 1194025.0] , [ 1309406400000 , 1194025.0] , [ 1312084800000 , 1194025.0] , [ 1314763200000 , 1244525.0] , [ 1317355200000 , 475000.0] , [ 1320033600000 , 475000.0] , [ 1322629200000 , 475000.0] , [ 1325307600000 , 690033.0] , [ 1327986000000 , 690033.0] , [ 1330491600000 , 690033.0] , [ 1333166400000 , 514733.0] , [ 1335758400000 , 514733.0]]
+			},
+			{
+				"key" : "Price" ,
+				"values" : [ [ 1136005200000 , 71.89] , [ 1138683600000 , 75.51] , [ 1141102800000 , 68.49] , [ 1143781200000 , 62.72] , [ 1146369600000 , 70.39] , [ 1149048000000 , 59.77] , [ 1151640000000 , 57.27] , [ 1154318400000 , 67.96] , [ 1156996800000 , 67.85] , [ 1159588800000 , 76.98] , [ 1162270800000 , 81.08] , [ 1164862800000 , 91.66] , [ 1167541200000 , 84.84] , [ 1170219600000 , 85.73] , [ 1172638800000 , 84.61] , [ 1175313600000 , 92.91] , [ 1177905600000 , 99.8] , [ 1180584000000 , 121.191] , [ 1183176000000 , 122.04] , [ 1185854400000 , 131.76] , [ 1188532800000 , 138.48] , [ 1191124800000 , 153.47] , [ 1193803200000 , 189.95] , [ 1196398800000 , 182.22] , [ 1199077200000 , 198.08] , [ 1201755600000 , 135.36] , [ 1204261200000 , 125.02] , [ 1206936000000 , 143.5] , [ 1209528000000 , 173.95] , [ 1212206400000 , 188.75] , [ 1214798400000 , 167.44] , [ 1217476800000 , 158.95] , [ 1220155200000 , 169.53] , [ 1222747200000 , 113.66] , [ 1225425600000 , 107.59] , [ 1228021200000 , 92.67] , [ 1230699600000 , 85.35] , [ 1233378000000 , 90.13] , [ 1235797200000 , 89.31] , [ 1238472000000 , 105.12] , [ 1241064000000 , 125.83] , [ 1243742400000 , 135.81] , [ 1246334400000 , 142.43] , [ 1249012800000 , 163.39] , [ 1251691200000 , 168.21] , [ 1254283200000 , 185.35] , [ 1256961600000 , 188.5] , [ 1259557200000 , 199.91] , [ 1262235600000 , 210.732] , [ 1264914000000 , 192.063] , [ 1267333200000 , 204.62] , [ 1270008000000 , 235.0] , [ 1272600000000 , 261.09] , [ 1275278400000 , 256.88] , [ 1277870400000 , 251.53] , [ 1280548800000 , 257.25] , [ 1283227200000 , 243.1] , [ 1285819200000 , 283.75] , [ 1288497600000 , 300.98] , [ 1291093200000 , 311.15] , [ 1293771600000 , 322.56] , [ 1296450000000 , 339.32] , [ 1298869200000 , 353.21] , [ 1301544000000 , 348.5075] , [ 1304136000000 , 350.13] , [ 1306814400000 , 347.83] , [ 1309406400000 , 335.67] , [ 1312084800000 , 390.48] , [ 1314763200000 , 384.83] , [ 1317355200000 , 381.32] , [ 1320033600000 , 404.78] , [ 1322629200000 , 382.2] , [ 1325307600000 , 405.0] , [ 1327986000000 , 456.48] , [ 1330491600000 , 542.44] , [ 1333166400000 , 599.55] , [ 1335758400000 , 583.98] ]
+			}
+		].map(function(series) {
+			series.values = series.values.map(function(d) { return {x: d[0], y: d[1] } });
+			return series;
+		});
+
+		var chart;
+		var chart2;
+		var chart3;
+		nv.addGraph(function() {
+			chart = nv.models.linePlusBarChart()
+				.margin({top: 50, right: 80, bottom: 30, left: 80})
+				.legendRightAxisHint(' [Using Right Axis]')
+				.color(['#eeeeee', '#2222ff', '#486192']);
+				//.color(d3.scale.category10().range());
+
+			chart.xAxis.tickFormat(function(d) {
+				return d3.time.format('%x')(new Date(d))
+			}).showMaxMin(false);
+
+			chart.y2Axis.tickFormat(function(d) { return '$' + d3.format(',f')(d) });
+			chart.bars.forceY([0]).padData(false);
+
+			chart.x2Axis.tickFormat(function(d) {
+				return d3.time.format('%x')(new Date(d))
+			}).showMaxMin(false);
+
+			d3.select('#chart1 svg')
+				.datum(testdata)
+				.transition().duration(500).call(chart);
+
+			nv.utils.windowResize(chart.update);
+
+			chart.dispatch.on('stateChange', function(e) { nv.log('New State:', JSON.stringify(e)); });
+
+			return chart;
+		});
+		
+		nv.addGraph(function() {
+			chart2 = nv.models.linePlusBarChart()
+				.margin({top: 50, right: 80, bottom: 30, left: 80})
+				.legendRightAxisHint(' [Using Right Axis]')
+				.color(d3.scale.category10().range());
+
+			chart2.xAxis.tickFormat(function(d) {
+				return d3.time.format('%x')(new Date(d))
+			}).showMaxMin(false);
+
+			chart2.y2Axis.tickFormat(function(d) { return '$' + d3.format(',f')(d) });
+			chart2.bars.forceY([0]).padData(false);
+
+			chart2.x2Axis.tickFormat(function(d) {
+				return d3.time.format('%x')(new Date(d))
+			}).showMaxMin(false);
+
+			d3.select('#chart2 svg')
+				.datum(testdata)
+				.transition().duration(500).call(chart2);
+
+			nv.utils.windowResize(chart2.update);
+
+			chart2.dispatch.on('stateChange', function(e) { nv.log('New State:', JSON.stringify(e)); });
+
+			return chart2;
+		});
+		
+		nv.addGraph(function() {
+			chart3 = nv.models.linePlusBarChart()
+				.margin({top: 50, right: 80, bottom: 30, left: 80})
+				.legendRightAxisHint(' [Using Right Axis]')
+				.color(d3.scale.category10().range());
+
+			chart3.xAxis.tickFormat(function(d) {
+				return d3.time.format('%x')(new Date(d))
+			}).showMaxMin(false);
+
+			chart3.y2Axis.tickFormat(function(d) { return '$' + d3.format(',f')(d) });
+			chart3.bars.forceY([0]).padData(false);
+
+			chart3.x2Axis.tickFormat(function(d) {
+				return d3.time.format('%x')(new Date(d))
+			}).showMaxMin(false);
+
+			d3.select('#chart3 svg')
+				.datum(testdata)
+				.transition().duration(500).call(chart3);
+
+			nv.utils.windowResize(chart3.update);
+
+			chart3.dispatch.on('stateChange', function(e) { nv.log('New State:', JSON.stringify(e)); });
+
+			return chart3;
+		});
+*/
+	</script>
+	</body>
+</html>
